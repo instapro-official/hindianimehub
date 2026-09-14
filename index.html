@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+      <!DOCTYPE html>
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
@@ -350,7 +350,7 @@
                 <label>Catbox Video Link (.mp4 direct link):</label>
                 <input type="url" id="animeVideoInput" required placeholder="https://files.catbox.moe/xxxxxx.mp4">
                 
-                <button type="submit" class="btn-submit">Upload Anime</button>
+                <button type="submit" class="btn-submit">Upload & Download JSON</button>
             </form>
         </div>
     </div>
@@ -381,12 +381,8 @@
         </a>
     </nav>
 
-    <!-- JavaScript with JSONBin.io Cloud Integration -->
+    <!-- JavaScript Local Storage & JSON Download Integration -->
     <script>
-        // Bin ID aur Master Key dono add kar di gayi hain
-        const BIN_ID = '67d025e1acd3cb34a8dec0c2'; 
-        const API_KEY = '$2a$10$a100JMmP/4gKA2o.Dk8nG.Pr1GSG.tOk9uDG0GClcTI/cu6fDGVzK';
-
         let savedAnime = [];
 
         const animeGrid = document.getElementById('animeGrid');
@@ -402,50 +398,33 @@
         const modalAnimeTitle = document.getElementById('modalAnimeTitle');
         const modalEpisodeInfo = document.getElementById('modalEpisodeInfo');
 
-        // Fetch Anime from JSONBin Cloud
         async function fetchAnime() {
             try {
-                const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-                    headers: {
-                        'X-Master-Key': API_KEY
-                    }
-                });
-                const data = await response.json();
-                savedAnime = data.record || [];
-                renderAnime(savedAnime);
-            } catch (error) {
-                console.error('Error fetching anime:', error);
-                animeGrid.innerHTML = "<div style='color: #ff4444; grid-column: 1/-1; text-align: center; padding: 20px;'>Data load karne mein error aayi!</div>";
-            }
-        }
-
-        // Update Anime to JSONBin Cloud
-        async function updateCloudBin(newList) {
-            try {
-                const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': API_KEY
-                    },
-                    body: JSON.stringify(newList)
-                });
-                if (response.ok) {
-                    savedAnime = newList;
+                const localData = localStorage.getItem('animeList_hindi');
+                if (localData) {
+                    savedAnime = JSON.parse(localData);
                     renderAnime(savedAnime);
-                    alert("Anime successfully global cloud par save ho gaya!");
                 } else {
-                    alert("Cloud par save karne mein kuch problem aayi!");
+                    const response = await fetch('anime.json');
+                    if (response.ok) {
+                        savedAnime = await response.json();
+                        localStorage.setItem('animeList_hindi', JSON.stringify(savedAnime));
+                    } else {
+                        savedAnime = [];
+                    }
+                    renderAnime(savedAnime);
                 }
             } catch (error) {
-                console.error('Error updating anime:', error);
+                console.error('Error fetching anime:', error);
+                savedAnime = [];
+                renderAnime(savedAnime);
             }
         }
 
         function renderAnime(list) {
             animeGrid.innerHTML = "";
             if (list.length === 0) {
-                animeGrid.innerHTML = "<div style='color: #aaa; grid-column: 1/-1; text-align: center; padding: 40px; font-size: 16px;'>Koi anime nahi mila!</div>";
+                animeGrid.innerHTML = "<div style='color: #aaa; grid-column: 1/-1; text-align: center; padding: 40px; font-size: 16px;'>Koi anime nahi mila! Admin se add karein.</div>";
                 return;
             }
             
@@ -481,12 +460,23 @@
 
         function deleteAnime(title) {
             if (confirm(`Kya aap "${title}" ko delete karna chahte hain?`)) {
-                const updatedList = savedAnime.filter(a => a.title !== title);
-                updateCloudBin(updatedList);
+                savedAnime = savedAnime.filter(a => a.title !== title);
+                localStorage.setItem('animeList_hindi', JSON.stringify(savedAnime));
+                renderAnime(savedAnime);
+                downloadJSONFile(savedAnime);
             }
         }
 
-        // Initial Load from Cloud
+        function downloadJSONFile(data) {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "anime.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
         fetchAnime();
 
         searchInput.addEventListener('input', (e) => {
@@ -563,9 +553,13 @@
                             videoUrl: videoUrl
                         };
 
-                        const updatedList = [newAnime, ...savedAnime];
-                        updateCloudBin(updatedList);
+                        savedAnime.unshift(newAnime);
+                        localStorage.setItem('animeList_hindi', JSON.stringify(savedAnime));
+                        renderAnime(savedAnime);
                         
+                        downloadJSONFile(savedAnime);
+                        alert("Anime add ho gaya! Ek naya 'anime.json' file download hua hoga, use apne GitHub repository mein upload kar dein.");
+
                         searchInput.value = "";
                         adminModal.style.display = 'none';
                         animeForm.reset();
@@ -577,3 +571,4 @@
     </script>
 </body>
 </html>
+      
