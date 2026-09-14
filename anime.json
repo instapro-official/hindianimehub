@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "title": "7th time loop",
+    "category": "hindi subb",
+    "image": "https://files.catbox.moe/kzoyqe.jpg",
+    "episodes": [
+      {
+        "episode": "session 1 episode 1",
+        "videoUrl": "https://files.catbox.moe/wtjguc.mp4"
+      }
+    ]
+  }
+]
