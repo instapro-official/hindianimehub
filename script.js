@@ -1,3 +1,6 @@
+// Check karein ki user admin hai ya nahi
+let isAdmin = localStorage.getItem("is_admin") === "true";
+
 // Default sample anime list
 let defaultAnimeList = [
     {
@@ -31,6 +34,13 @@ const animeVideoPlayer = document.getElementById('animeVideoPlayer');
 const modalAnimeTitle = document.getElementById('modalAnimeTitle');
 const modalEpisodeInfo = document.getElementById('modalEpisodeInfo');
 
+// Page load par Admin button ko hamesha hide rakho
+document.addEventListener("DOMContentLoaded", () => {
+    if (adminBtn) {
+        adminBtn.style.display = 'none'; // Sabhi ke liye hide rahega
+    }
+});
+
 // Render Anime Function
 function renderAnime(list) {
     animeGrid.innerHTML = "";
@@ -38,10 +48,15 @@ function renderAnime(list) {
         const card = document.createElement('div');
         card.className = 'anime-card';
         
-        card.innerHTML = `
+        // Sirf Admin ko delete button dikhega
+        let deleteButtonHTML = isAdmin ? `
             <button class="card-delete-btn" onclick="event.stopPropagation(); deleteAnime(${originalIndex})" title="Delete Anime" style="position: absolute; top: 5px; right: 5px; background: rgba(255,0,0,0.8); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; z-index: 10; font-size: 11px;">
                 <i class="fa-solid fa-trash"></i>
             </button>
+        ` : '';
+
+        card.innerHTML = `
+            ${deleteButtonHTML}
             <div class="card-img">
                 <img src="${anime.image}" alt="${anime.title}">
                 <span class="episode-badge">${anime.episode}</span>
@@ -52,7 +67,6 @@ function renderAnime(list) {
             </div>
         `;
         
-        // Click to play video
         card.addEventListener('click', () => {
             modalAnimeTitle.innerText = anime.title;
             modalEpisodeInfo.innerText = anime.episode + " • " + anime.category;
@@ -67,6 +81,7 @@ function renderAnime(list) {
 
 // Delete Anime Function
 function deleteAnime(index) {
+    if (!isAdmin) return;
     if (confirm("Kya aap sach mein is anime ko delete karna chahte hain?")) {
         savedAnime.splice(index, 1);
         localStorage.setItem('animeHindiGharList', JSON.stringify(savedAnime));
@@ -74,34 +89,53 @@ function deleteAnime(index) {
     }
 }
 
-// Initial load
 renderAnime(savedAnime);
 
-// Search Functionality
 searchInput.addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase();
     const filtered = savedAnime.filter(a => a.title.toLowerCase().includes(term) || a.category.toLowerCase().includes(term) || a.episode.toLowerCase().includes(term));
     renderAnime(filtered);
 });
 
-// Admin Modal Open/Close
-adminBtn.addEventListener('click', () => {
-    adminModal.style.display = 'flex';
+// SECRET TRICK: Website ke title ("AnimeHindiGhar") par 5 baar fast click karne se Admin panel khulega
+let titleClickCount = 0;
+const siteTitle = document.querySelector('header h1') || document.querySelector('.logo') || document.querySelector('#AnimeHindiGhar') || document.querySelector('nav');
+
+// Agar header ya title mil jaye toh uspe event lagayein
+document.addEventListener('click', (e) => {
+    // Check karo kya user ne header/logo par click kiya hai (jisme website ka naam hai)
+    if (e.target.innerText && e.target.innerText.includes("AnimeHindiGhar")) {
+        titleClickCount++;
+        if (titleClickCount >= 5) {
+            titleClickCount = 0; // Reset counter
+            let pass = prompt("Admin Password daaliye:");
+            if (pass === "admin123") { // Yahan apna password change kar sakte hain
+                localStorage.setItem("is_admin", "true");
+                isAdmin = true;
+                alert("Admin Login Successful!");
+                renderAnime(savedAnime);
+                adminModal.style.display = 'flex';
+            } else if (pass !== null) {
+                alert("Galat Password!");
+            }
+        }
+    }
 });
+
 closeModal.addEventListener('click', () => {
     adminModal.style.display = 'none';
 });
 
-// Video Modal Close
 closeVideoModal.addEventListener('click', () => {
     videoModal.style.display = 'none';
     animeVideoPlayer.pause();
     animeVideoPlayer.src = "";
 });
 
-// Handle Admin Form Submit & Gallery Image Base64 Conversion
 animeForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    if (!isAdmin) return;
+    
     const title = document.getElementById('animeTitleInput').value;
     const episode = document.getElementById('animeEpisodeInput').value;
     const category = document.getElementById('animeCategoryInput').value;
