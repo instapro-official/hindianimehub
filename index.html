@@ -1,63 +1,101 @@
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ANIME HUB</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-body{background:#0f0f0f;color:#fff}
-.top{background:#202020;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
-.logo{display:flex;align-items:center;gap:6px;font-weight:900;font-size:20px}
-.logo.a1{color:#ffb7d5}
-.logo.a2{color:#fff}
-.logo small{font-size:10px;background:#ffb7d5;color:#000;padding:2px 6px;border-radius:4px;font-weight:800}
-.postBtn{margin:14px 16px;background:#ffb7d5;color:#000;border:none;padding:12px 18px;border-radius:20px;font-weight:800}
-.admin{background:#1e1e1e;margin:0 16px 16px;padding:16px;border-radius:12px;display:none}
-.admin.show{display:block}
-.admin input{width:100%;padding:12px;margin-top:10px;border-radius:8px;border:none;background:#2a2a2a;color:#fff}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 20px}
-.card{background:#1e1e1e;border-radius:10px;overflow:hidden;position:relative}
-.card img{width:100%;height:200px;object-fit:cover}
-.del{position:absolute;top:6px;left:6px;background:#ff4155;color:#fff;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:800;z-index:5}
-.badge{position:absolute;bottom:38px;left:6px;background:#ffb7d5;color:#000;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:800}
-.title{padding:8px;font-size:13px}
-.modal{position:fixed;inset:0;background:#000;display:none;flex-direction:column;z-index:99}
-.modal.show{display:flex}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anime Hindi Ghar - Watch Anime in Hindi</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-<div class="top">
-<div class="logo"><span class="a1">ANIME</span><span class="a2">HUB</span><small>HD</small></div>
-<span>🔍</span>
-</div>
 
-<button class="postBtn" onclick="document.getElementById('admin').classList.toggle('show')">+ Nayi Anime Post Karein</button>
+    <!-- Top Navigation Bar -->
+    <header class="navbar">
+        <div class="nav-left">
+            <h1 class="logo">Anime<span>HindiGhar</span></h1>
+        </div>
+        <div class="nav-right">
+            <button id="adminBtn" class="admin-btn"><i class="fa-solid fa-lock"></i> Admin</button>
+        </div>
+    </header>
 
-<div id="admin" class="admin">
-<input id="aname" placeholder="Anime Name">
-<input type="file" id="afile" accept="image/*">
-<div id="ok" style="display:none;color:#00ff88;font-size:12px;margin-top:5px">✅ Photo Gallery se Ready</div>
-<input id="aep" placeholder="Episode No">
-<input id="alink" placeholder="Catbox Link - https://files.catbox.moe/xxx.mp4">
-<button onclick="publish()" style="width:100%;margin-top:12px;background:#ffb7d5;color:#000;border:none;padding:12px;border-radius:8px;font-weight:800">PUBLISH</button>
-</div>
+    <!-- Search Bar Section -->
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Anime search karein (e.g., Naruto, One Piece)...">
+        <i class="fa-solid fa-search"></i>
+    </div>
 
-<h2 style="padding:16px">Popular Today</h2>
-<div id="popular" class="grid"></div>
+    <!-- Hero / Featured Section -->
+    <section class="hero" id="heroSection">
+        <div class="hero-content">
+            <span class="badge">HINDI DUBBED</span>
+            <h2 class="hero-title" id="heroTitle">WELCOME TO ANIME HINDI GHAR</h2>
+            <p class="hero-tags" id="heroTags">Dub | Sub • Action, Adventure, Shonen</p>
+            <p class="hero-desc" id="heroDesc">
+                Yahan aapko sabhi latest anime Hindi dub aur sub mein milenge. Neeche scroll karein aur 50+ anime ki list explore karein!
+            </p>
+            <div class="hero-buttons">
+                <button class="btn-primary" id="heroPlayBtn"><i class="fa-solid fa-play"></i> Watch Now</button>
+            </div>
+        </div>
+    </section>
 
-<div id="player" class="modal">
-<div style="display:flex;justify-content:space-between;padding:12px;background:#111"><span id="ptitle"></span><span onclick="closeP()" style="font-size:28px">✕</span></div>
-<div id="pWrap" style="flex:1;display:flex;background:#000"></div>
-</div>
+    <!-- Anime List Section (50+ Scrollable) -->
+    <main class="main-container">
+        <h3 class="section-title">All Anime List (Scroll Down)</h3>
+        <div class="anime-grid" id="animeGrid">
+            <!-- Dynamic Anime Cards JavaScript se yahan aayengi -->
+        </div>
+    </main>
 
-<script>
-let poster="";let list=JSON.parse(localStorage.getItem("animehub_final")||"[]");
-document.getElementById("afile").addEventListener("change",e=>{let r=new FileReader();r.onload=ev=>{poster=ev.target.result;document.getElementById("ok").style.display="block";};r.readAsDataURL(e.target.files[0]);});
-function publish(){let n=document.getElementById("aname").value.trim(),ep=document.getElementById("aep").value.trim(),link=document.getElementById("alink").value.trim();if(!n||!poster||!link){alert("Sab bharo");return;}list.unshift({id:Date.now(),name:n,ep:ep,poster:poster,link:link});localStorage.setItem("animehub_final",JSON.stringify(list));render();document.getElementById("admin").classList.remove("show");}
-function render(){let g=document.getElementById("popular");g.innerHTML="";list.forEach(a=>{let d=document.createElement("div");d.className="card";d.innerHTML=`<span class="del" onclick="delEp(${a.id},event)">DELETE</span><img src="${a.poster}"><span class="badge">Ep ${a.ep}</span><div class="title">${a.name}</div>`;d.onclick=()=>{document.getElementById("ptitle").innerText=a.name;document.getElementById("pWrap").innerHTML=`<video src="${a.link}" controls autoplay playsinline style="width:100%;height:100%"></video>`;document.getElementById("player").classList.add("show");};g.appendChild(d);});}
-function delEp(id,ev){ev.stopPropagation();if(confirm("Delete?")){list=list.filter(x=>x.id!==id);localStorage.setItem("animehub_final",JSON.stringify(list));render();}}
-function closeP(){document.getElementById("player").classList.remove("show");document.getElementById("pWrap").innerHTML="";}
-render();
-</script>
+    <!-- Admin Panel Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeModal">&times;</span>
+            <h2>Admin Panel - Add Anime</h2>
+            <form id="animeForm">
+                <label>Anime Title:</label>
+                <input type="text" id="animeTitleInput" required placeholder="Anime ka naam">
+                
+                <label>Category / Genres (Dub | Sub):</label>
+                <input type="text" id="animeCategoryInput" required placeholder="Action, Dub | Sub">
+                
+                <label>Gallery se Photo Select Karein (Permanent):</label>
+                <input type="file" id="animeImageInput" accept="image/*" required>
+                
+                <label>Catbox Video Link (.mp4 direct link):</label>
+                <input type="url" id="animeVideoInput" required placeholder="https://files.catbox.moe/xxxxxx.mp4">
+                
+                <button type="submit" class="btn-submit">Upload Anime</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Video Player Modal -->
+    <div id="videoModal" class="modal">
+        <div class="video-modal-content">
+            <span class="close-btn" id="closeVideoModal">&times;</span>
+            <h2 id="modalAnimeTitle" style="margin-bottom: 10px;"></h2>
+            <video id="animeVideoPlayer" controls style="width:150%; max-height:400px; background:#000;"></video>
+        </div>
+    </div>
+
+    <!-- Bottom Mobile Navigation Bar -->
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="#" class="nav-item" onclick="document.getElementById('searchInput').focus(); return false;">
+            <i class="fa-solid fa-search"></i>
+            <span>Search</span>
+        </a>
+        <a href="#" class="nav-item" onclick="document.getElementById('adminBtn').click(); return false;">
+            <i class="fa-solid fa-upload"></i>
+            <span>Admin Add</span>
+        </a>
+    </nav>
+
+    <script src="script.js"></script>
 </body>
 </html>
