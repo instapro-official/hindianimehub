@@ -4,8 +4,292 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anime Hindi Ghar - Watch Anime in Hindi</title>
-    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            padding-bottom: 70px;
+        }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: #0f0f0f;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .logo span {
+            color: #f47521;
+        }
+
+        .admin-btn {
+            background-color: #f47521;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        /* Search Bar */
+        .search-container {
+            padding: 15px 20px;
+            background: #181818;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            background-color: #2a2a2a;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 32px;
+            color: #888;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 300px;
+            background: linear-gradient(to top, #121212, rgba(18, 18, 18, 0.4)), 
+                        url('https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1000') center/cover no-repeat;
+            display: flex;
+            align-items: flex-end;
+            padding: 20px;
+        }
+
+        .hero-content {
+            max-width: 600px;
+        }
+
+        .badge {
+            background-color: #f47521;
+            color: #fff;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 3px;
+        }
+
+        .hero-title {
+            font-size: 22px;
+            font-weight: 900;
+            margin: 8px 0;
+        }
+
+        .hero-tags {
+            font-size: 12px;
+            color: #d0d0d0;
+            margin-bottom: 8px;
+        }
+
+        .hero-desc {
+            font-size: 12px;
+            color: #b8b8b8;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Main Container & Grid */
+        .main-container {
+            padding: 20px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            border-left: 4px solid #f47521;
+            padding-left: 8px;
+        }
+
+        .anime-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+        }
+
+        .anime-card {
+            background-color: #1a1a1a;
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        .anime-card:hover {
+            transform: scale(1.03);
+        }
+
+        .card-img {
+            position: relative;
+        }
+
+        .card-img img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .episode-badge {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #f47521;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 3px;
+            border: 1px solid #f47521;
+        }
+
+        .card-info {
+            padding: 8px;
+        }
+
+        .card-info h4 {
+            font-size: 13px;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-info p {
+            font-size: 11px;
+            color: #888;
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content, .video-modal-content {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 450px;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            right: 15px;
+            top: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close-btn:hover {
+            color: #fff;
+        }
+
+        #animeForm label {
+            display: block;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #ccc;
+        }
+
+        #animeForm input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 4px;
+        }
+
+        .btn-submit {
+            margin-top: 15px;
+            width: 100%;
+            background-color: #f47521;
+            color: white;
+            padding: 10px;
+            border: none;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #181818;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid #282828;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #888;
+            font-size: 10px;
+            gap: 4px;
+        }
+
+        .nav-item i {
+            font-size: 18px;
+        }
+
+        .nav-item.active {
+            color: #f47521;
+        }
+    </style>
 </head>
 <body>
 
@@ -54,7 +338,7 @@
                 <label>Anime Title:</label>
                 <input type="text" id="animeTitleInput" required placeholder="Jaise: Naruto Shippuden">
                 
-                <label>Episode Details (Jaise: Episode 1 / Ep 5):</label>
+                <label>Episode Details (Jaise: Episode 1):</label>
                 <input type="text" id="animeEpisodeInput" required placeholder="Episode 1">
                 
                 <label>Category / Genres (Dub | Sub):</label>
@@ -97,6 +381,178 @@
         </a>
     </nav>
 
-    <script src="script.js"></script>
+    <!-- JavaScript code -->
+    <script>
+        let defaultAnimeList = [
+            {
+                title: "Naruto Shippuden",
+                episode: "Episode 1",
+                category: "Hindi Dub | Sub",
+                image: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400",
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            },
+            {
+                title: "One Piece",
+                episode: "Episode 1",
+                category: "Hindi Dub",
+                image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=400",
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            }
+        ];
+
+        let savedAnime = JSON.parse(localStorage.getItem('animeHindiGharList'));
+        if (!savedAnime || !Array.isArray(savedAnime) || savedAnime.length === 0) {
+            savedAnime = defaultAnimeList;
+            localStorage.setItem('animeHindiGharList', JSON.stringify(savedAnime));
+        }
+
+        const animeGrid = document.getElementById('animeGrid');
+        const searchInput = document.getElementById('searchInput');
+        const adminBtn = document.getElementById('adminBtn');
+        const adminModal = document.getElementById('adminModal');
+        const closeModal = document.getElementById('closeModal');
+        const animeForm = document.getElementById('animeForm');
+
+        const videoModal = document.getElementById('videoModal');
+        const closeVideoModal = document.getElementById('closeVideoModal');
+        const animeVideoPlayer = document.getElementById('animeVideoPlayer');
+        const modalAnimeTitle = document.getElementById('modalAnimeTitle');
+        const modalEpisodeInfo = document.getElementById('modalEpisodeInfo');
+
+        function renderAnime(list) {
+            animeGrid.innerHTML = "";
+            if (list.length === 0) {
+                animeGrid.innerHTML = "<div style='color: #aaa; grid-column: 1/-1; text-align: center; padding: 40px; font-size: 16px;'>Koi anime nahi mila! Sahi spelling check karein.</div>";
+                return;
+            }
+            
+            list.forEach((anime) => {
+                const card = document.createElement('div');
+                card.className = 'anime-card';
+                
+                card.innerHTML = `
+                    <button class="card-delete-btn" onclick="event.stopPropagation(); deleteAnime('${anime.title}')" title="Delete Anime" style="position: absolute; top: 5px; right: 5px; background: rgba(255,0,0,0.8); color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; z-index: 10; font-size: 12px;">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                    <div class="card-img">
+                        <img src="${anime.image}" alt="${anime.title}">
+                        <span class="episode-badge">${anime.episode}</span>
+                    </div>
+                    <div class="card-info">
+                        <h4>${anime.title}</h4>
+                        <p>${anime.category}</p>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => {
+                    modalAnimeTitle.innerText = anime.title;
+                    modalEpisodeInfo.innerText = anime.episode + " • " + anime.category;
+                    animeVideoPlayer.src = anime.videoUrl;
+                    videoModal.style.display = 'flex';
+                    animeVideoPlayer.play();
+                });
+                
+                animeGrid.appendChild(card);
+            });
+        }
+
+        function deleteAnime(title) {
+            if (confirm(`Kya aap "${title}" ko delete karna chahte hain?`)) {
+                savedAnime = savedAnime.filter(a => a.title !== title);
+                localStorage.setItem('animeHindiGharList', JSON.stringify(savedAnime));
+                renderAnime(savedAnime);
+            }
+        }
+
+        renderAnime(savedAnime);
+
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase().trim();
+            if (term === "") {
+                renderAnime(savedAnime);
+                return;
+            }
+            const filtered = savedAnime.filter(a => 
+                a.title.toLowerCase().includes(term) || 
+                a.category.toLowerCase().includes(term) || 
+                a.episode.toLowerCase().includes(term)
+            );
+            renderAnime(filtered);
+        });
+
+        adminBtn.addEventListener('click', () => {
+            adminModal.style.display = 'flex';
+        });
+        closeModal.addEventListener('click', () => {
+            adminModal.style.display = 'none';
+        });
+
+        closeVideoModal.addEventListener('click', () => {
+            videoModal.style.display = 'none';
+            animeVideoPlayer.pause();
+            animeVideoPlayer.src = "";
+        });
+
+        animeForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = document.getElementById('animeTitleInput').value.trim();
+            const episode = document.getElementById('animeEpisodeInput').value.trim();
+            const category = document.getElementById('animeCategoryInput').value.trim();
+            const videoUrl = document.getElementById('animeVideoInput').value.trim();
+            const imageFile = document.getElementById('animeImageInput').files[0];
+
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = function(uploadEvent) {
+                    const img = new Image();
+                    img.src = uploadEvent.target.result;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 300;
+                        const MAX_HEIGHT = 450;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                        } else {
+                            if (height > MAX_HEIGHT) {
+                                width *= MAX_HEIGHT / height;
+                                height = MAX_HEIGHT;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+
+                        const newAnime = {
+                            title: title,
+                            episode: episode,
+                            category: category,
+                            image: compressedBase64,
+                            videoUrl: videoUrl
+                        };
+
+                        savedAnime.unshift(newAnime);
+                        localStorage.setItem('animeHindiGharList', JSON.stringify(savedAnime));
+                        
+                        searchInput.value = "";
+                        renderAnime(savedAnime);
+                        adminModal.style.display = 'none';
+                        animeForm.reset();
+                        alert("Anime successfully save ho gaya!");
+                    };
+                };
+                reader.readAsDataURL(imageFile);
+            }
+        });
+    </script>
 </body>
 </html>
