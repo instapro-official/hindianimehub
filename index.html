@@ -372,8 +372,8 @@
                 <label>Category / Genres:</label>
                 <input type="text" id="animeCategoryInput" required placeholder="Hindi Sub">
                 
-                <label>Gallery se Photo Select Karein:</label>
-                <input type="file" id="animeImageInput" accept="image/*">
+                <label>Image Direct Link (.jpg / .png URL):</label>
+                <input type="url" id="animeImageInput" placeholder="https://... image link yahan dalein">
                 
                 <label>Catbox Video Link (.mp4 direct link):</label>
                 <input type="url" id="animeVideoInput" required placeholder="https://files.catbox.moe/xxxxxx.mp4">
@@ -420,7 +420,6 @@
         let isAdmin = localStorage.getItem("is_admin") === "true";
         let savedAnime = [];
 
-        // Auto-fill stored GitHub credentials if available
         window.addEventListener('DOMContentLoaded', () => {
             if(localStorage.getItem('gh_user')) document.getElementById('ghUser').value = localStorage.getItem('gh_user');
             if(localStorage.getItem('gh_repo')) document.getElementById('ghRepo').value = localStorage.getItem('gh_repo');
@@ -558,7 +557,6 @@
             renderAnime(filtered);
         });
 
-        // Secret 5-Tap Trick on Logo
         let titleClickCount = 0;
         if (siteLogo) {
             siteLogo.addEventListener('click', () => {
@@ -590,7 +588,6 @@
             animeVideoPlayer.src = "";
         });
 
-        // Form Submit & GitHub Direct API Commit
         animeForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!isAdmin) return;
@@ -599,7 +596,6 @@
             const repo = document.getElementById('ghRepo').value.trim();
             const token = document.getElementById('ghToken').value.trim();
 
-            // Save credentials in browser
             localStorage.setItem('gh_user', username);
             localStorage.setItem('gh_repo', repo);
             localStorage.setItem('gh_token', token);
@@ -608,97 +604,69 @@
             const episode = document.getElementById('animeEpisodeInput').value.trim();
             const category = document.getElementById('animeCategoryInput').value.trim();
             const videoUrl = document.getElementById('animeVideoInput').value.trim();
-            const imageFile = document.getElementById('animeImageInput').files[0];
+            const imageUrlInput = document.getElementById('animeImageInput').value.trim();
 
-            async function processUpload(imageUrl) {
-                // Fetch current anime.json from GitHub to get latest SHA and data
-                let sha = "";
-                let currentList = [];
-                try {
-                    const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/anime.json`, {
-                        headers: { "Authorization": `token ${token}` }
-                    });
-                    if (res.ok) {
-                        const fileData = await res.json();
-                        sha = fileData.sha;
-                        currentList = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
-                    }
-                } catch(err) {
-                    console.log("Creating new anime.json or fetching error");
-                }
-
-                let groupedList = convertToGrouped(currentList);
-                let existingAnime = groupedList.find(a => a.title.toLowerCase() === title.toLowerCase());
-
-                if (existingAnime) {
-                    existingAnime.episodes.push({ episode: episode, videoUrl: videoUrl });
-                    if (category) existingAnime.category = category;
-                    if (imageUrl) existingAnime.image = imageUrl;
-                } else {
-                    const newAnime = {
-                        title: title,
-                        category: category,
-                        image: imageUrl || 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500',
-                        episodes: [{ episode: episode, videoUrl: videoUrl }]
-                    };
-                    groupedList.unshift(newAnime);
-                }
-
-                // Push back to GitHub via API
-                const jsonContent = btoa(unescape(encodeURIComponent(JSON.stringify(groupedList, null, 2))));
-                
-                const updateRes = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/anime.json`, {
-                    method: "PUT",
-                    headers: {
-                        "Authorization": `token ${token}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        message: `Add ${title} - ${episode}`,
-                        content: jsonContent,
-                        sha: sha ? sha : undefined
-                    })
+            let sha = "";
+            let currentList = [];
+            try {
+                const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/anime.json`, {
+                    headers: { "Authorization": `token ${token}` }
                 });
-
-                if (updateRes.ok) {
-                    alert("Success! Episode seedha GitHub par update ho gaya hai. 1-2 minute mein website par live ho jayega!");
-                    adminModal.style.display = 'none';
-                    animeForm.reset();
-                    fetchAnime();
-                } else {
-                    alert("Error: GitHub par update nahi ho paya. Token ya Username/Repo check karein.");
+                if (res.ok) {
+                    const fileData = await res.json();
+                    sha = fileData.sha;
+                    currentList = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
                 }
+            } catch(err) {
+                console.log("Creating new anime.json or fetching error");
             }
 
-            if (imageFile) {
-                const reader = new FileReader();
-                reader.onload = function(uploadEvent) {
-                    const img = new Image();
-                    img.src = uploadEvent.target.result;
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 300;
-                        const MAX_HEIGHT = 450;
-                        let width = img.width;
-                        let height = img.height;
-                        if (width > height) {
-                            if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                        } else {
-                            if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                        }
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                        processUpload(compressedBase64);
-                    };
-                };
-                reader.readAsDataURL(imageFile);
+            let groupedList = convertToGrouped(currentList);
+            let existingAnime = groupedList.find(a => a.title.toLowerCase() === title.toLowerCase());
+
+            let finalImage = imageUrlInput;
+            if (!finalImage && existingAnime) {
+                finalImage = existingAnime.image;
+            } else if (!finalImage) {
+                finalImage = 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500';
+            }
+
+            if (existingAnime) {
+                existingAnime.episodes.push({ episode: episode, videoUrl: videoUrl });
+                if (category) existingAnime.category = category;
+                if (imageUrlInput) existingAnime.image = imageUrlInput;
             } else {
-                let existingAnime = savedAnime.find(a => a.title.toLowerCase() === title.toLowerCase());
-                let existingImage = existingAnime ? existingAnime.image : '';
-                processUpload(existingImage);
+                const newAnime = {
+                    title: title,
+                    category: category,
+                    image: finalImage,
+                    episodes: [{ episode: episode, videoUrl: videoUrl }]
+                };
+                groupedList.unshift(newAnime);
+            }
+
+            const jsonContent = btoa(unescape(encodeURIComponent(JSON.stringify(groupedList, null, 2))));
+            
+            const updateRes = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/anime.json`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `token ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: `Add ${title} - ${episode}`,
+                    content: jsonContent,
+                    sha: sha ? sha : undefined
+                })
+            });
+
+            if (updateRes.ok) {
+                alert("Success! Episode seedha GitHub par update ho gaya hai. 1-2 minute mein website par live ho jayega!");
+                adminModal.style.display = 'none';
+                animeForm.reset();
+                fetchAnime();
+            } else {
+                alert("Error: GitHub par update nahi ho paya. Token ya Username/Repo check karein.");
             }
         });
     </script>
