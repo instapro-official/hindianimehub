@@ -1,59 +1,108 @@
-let poster="";
-let list=JSON.parse(localStorage.getItem("animehub_final")||"[]");
-
-document.addEventListener("DOMContentLoaded",()=>{
-  let f=document.getElementById("afile");
-  if(f){
-    f.addEventListener("change",e=>{
-      let r=new FileReader();
-      r.onload=ev=>{
-        poster=ev.target.result;
-        document.getElementById("ok").style.display="block";
-      };
-      r.readAsDataURL(e.target.files[0]);
+// Sample 50+ Anime Default Data taaki page khulte hi dher saare anime scroll karne ko milein
+let defaultAnimeList = [];
+for (let i = 1; i <= 55; i++) {
+    defaultAnimeList.push({
+        title: `Anime Series ${i}`,
+        category: "Hindi Dub | Sub",
+        image: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400",
+        videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" // Test video
     });
-  }
-  render();
+}
+
+// LocalStorage se saved anime load karna
+let savedAnime = JSON.parse(localStorage.getItem('animeHindiGharList')) || defaultAnimeList;
+
+const animeGrid = document.getElementById('animeGrid');
+const searchInput = document.getElementById('searchInput');
+const adminBtn = document.getElementById('adminBtn');
+const adminModal = document.getElementById('adminModal');
+const closeModal = document.getElementById('closeModal');
+const animeForm = document.getElementById('animeForm');
+
+const videoModal = document.getElementById('videoModal');
+const closeVideoModal = document.getElementById('closeVideoModal');
+const animeVideoPlayer = document.getElementById('animeVideoPlayer');
+const modalAnimeTitle = document.getElementById('modalAnimeTitle');
+
+// Render Anime Function
+function renderAnime(list) {
+    animeGrid.innerHTML = "";
+    list.forEach((anime, index) => {
+        const card = document.createElement('div');
+        card.className = 'anime-card';
+        card.innerHTML = `
+            <div class="card-img">
+                <img src="${anime.image}" alt="${anime.title}">
+            </div>
+            <div class="card-info">
+                <h4>${anime.title}</h4>
+                <p>${anime.category}</p>
+            </div>
+        `;
+        // Click karne par video play hoga
+        card.addEventListener('click', () => {
+            modalAnimeTitle.innerText = anime.title;
+            animeVideoPlayer.src = anime.videoUrl;
+            videoModal.style.display = 'flex';
+            animeVideoPlayer.play();
+        });
+        animeGrid.appendChild(card);
+    });
+}
+
+// Initial load
+renderAnime(savedAnime);
+
+// Search Functionality
+searchInput.addEventListener('input', (e) => {
+    const term = e.target.value.toLowerCase();
+    const filtered = savedAnime.filter(a => a.title.toLowerCase().includes(term) || a.category.toLowerCase().includes(term));
+    renderAnime(filtered);
 });
 
-function publish(){
-  let n=document.getElementById("aname").value.trim();
-  let ep=document.getElementById("aep").value.trim();
-  let link=document.getElementById("alink").value.trim();
-  if(!n||!poster||!link){alert("Name, Photo aur Link bharo");return;}
-  list.unshift({id:Date.now(),name:n,ep:ep,poster:poster,link:link});
-  localStorage.setItem("animehub_final",JSON.stringify(list));
-  render();
-  document.getElementById('admin').classList.remove('show');
-}
+// Admin Modal Open/Close
+adminBtn.addEventListener('click', () => {
+    adminModal.style.display = 'flex';
+});
+closeModal.addEventListener('click', () => {
+    adminModal.style.display = 'none';
+});
 
-function render(){
-  let g=document.getElementById("popular");
-  if(!g) return;
-  g.innerHTML="";
-  list.forEach(a=>{
-    let d=document.createElement("div");
-    d.className="card";
-    d.innerHTML=`<span class="del" onclick="delEp(${a.id},event)">DELETE</span><img src="${a.poster}"><span class="badge">Ep ${a.ep}</span><div class="title">${a.name}</div>`;
-    d.onclick=()=>{
-      document.getElementById("ptitle").innerText=a.name;
-      document.getElementById("pWrap").innerHTML=`<video src="${a.link}" controls autoplay playsinline style="width:100%;height:100%"></video>`;
-      document.getElementById("player").classList.add("show");
-    };
-    g.appendChild(d);
-  });
-}
+// Video Modal Close
+closeVideoModal.addEventListener('click', () => {
+    videoModal.style.display = 'none';
+    animeVideoPlayer.pause();
+    animeVideoPlayer.src = "";
+});
 
-function delEp(id,ev){
-  ev.stopPropagation();
-  if(confirm("Delete kare?")){
-    list=list.filter(x=>x.id!==id);
-    localStorage.setItem("animehub_final",JSON.stringify(list));
-    render();
-  }
-}
+// Handle Admin Form Submit & Gallery Permanent Image (Base64) Conversion
+animeForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const title = document.getElementById('animeTitleInput').value;
+    const category = document.getElementById('animeCategoryInput').value;
+    const videoUrl = document.getElementById('animeVideoInput').value;
+    const imageFile = document.getElementById('animeImageInput').files[0];
 
-function closeP(){
-  document.getElementById("player").classList.remove("show");
-  document.getElementById("pWrap").innerHTML="";
-}
+    if (imageFile) {
+        const reader = new FileReader();
+        reader.onload = function(uploadEvent) {
+            const base64Image = uploadEvent.target.result; // Ye kabhi expire nahi hoga
+            
+            const newAnime = {
+                title: title,
+                category: category,
+                image: base64Image,
+                videoUrl: videoUrl
+            };
+
+            savedAnime.unshift(newAnime); // Naya anime sabse upar add hoga
+            localStorage.setItem('animeHindiGharList', JSON.stringify(savedAnime));
+            
+            renderAnime(savedAnime);
+            adminModal.style.display = 'none';
+            animeForm.reset();
+            alert("Anime successfully upload ho gaya!");
+        };
+        reader.readAsDataURL(imageFile);
+    }
+});
