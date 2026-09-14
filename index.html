@@ -1,4 +1,4 @@
-      <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
@@ -35,21 +35,12 @@
             font-size: 20px;
             font-weight: bold;
             color: #ffffff;
+            cursor: pointer;
+            user-select: none;
         }
 
         .logo span {
             color: #f47521;
-        }
-
-        .admin-btn {
-            background-color: #f47521;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 13px;
         }
 
         /* Search Bar */
@@ -293,13 +284,10 @@
 </head>
 <body>
 
-    <!-- Top Navigation Bar -->
+    <!-- Top Navigation Bar (Admin button removed) -->
     <header class="navbar">
         <div class="nav-left">
-            <h1 class="logo">Anime<span>HindiGhar</span></h1>
-        </div>
-        <div class="nav-right">
-            <button id="adminBtn" class="admin-btn"><i class="fa-solid fa-lock"></i> Admin</button>
+            <h1 class="logo" id="siteLogo">Anime<span>HindiGhar</span></h1>
         </div>
     </header>
 
@@ -365,7 +353,7 @@
         </div>
     </div>
 
-    <!-- Bottom Mobile Navigation Bar -->
+    <!-- Bottom Mobile Navigation Bar (Admin Add removed) -->
     <nav class="bottom-nav">
         <a href="#" class="nav-item active">
             <i class="fa-solid fa-house"></i>
@@ -375,22 +363,20 @@
             <i class="fa-solid fa-search"></i>
             <span>Search</span>
         </a>
-        <a href="#" class="nav-item" onclick="document.getElementById('adminBtn').click(); return false;">
-            <i class="fa-solid fa-upload"></i>
-            <span>Admin Add</span>
-        </a>
     </nav>
 
     <!-- JavaScript Local Storage & JSON Download Integration -->
     <script>
+        // Check Admin Status
+        let isAdmin = localStorage.getItem("is_admin") === "true";
         let savedAnime = [];
 
         const animeGrid = document.getElementById('animeGrid');
         const searchInput = document.getElementById('searchInput');
-        const adminBtn = document.getElementById('adminBtn');
         const adminModal = document.getElementById('adminModal');
         const closeModal = document.getElementById('closeModal');
         const animeForm = document.getElementById('animeForm');
+        const siteLogo = document.getElementById('siteLogo');
 
         const videoModal = document.getElementById('videoModal');
         const closeVideoModal = document.getElementById('closeVideoModal');
@@ -424,7 +410,7 @@
         function renderAnime(list) {
             animeGrid.innerHTML = "";
             if (list.length === 0) {
-                animeGrid.innerHTML = "<div style='color: #aaa; grid-column: 1/-1; text-align: center; padding: 40px; font-size: 16px;'>Koi anime nahi mila! Admin se add karein.</div>";
+                animeGrid.innerHTML = "<div style='color: #aaa; grid-column: 1/-1; text-align: center; padding: 40px; font-size: 16px;'>Koi anime nahi mila!</div>";
                 return;
             }
             
@@ -432,10 +418,15 @@
                 const card = document.createElement('div');
                 card.className = 'anime-card';
                 
-                card.innerHTML = `
+                // Delete button sirf tabhi dikhega jab user Admin hoga
+                let deleteButtonHTML = isAdmin ? `
                     <button class="card-delete-btn" onclick="event.stopPropagation(); deleteAnime('${anime.title}')" title="Delete Anime" style="position: absolute; top: 5px; right: 5px; background: rgba(255,0,0,0.8); color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; z-index: 10; font-size: 12px;">
                         <i class="fa-solid fa-trash"></i>
                     </button>
+                ` : '';
+                
+                card.innerHTML = `
+                    ${deleteButtonHTML}
                     <div class="card-img">
                         <img src="${anime.image}" alt="${anime.title}">
                         <span class="episode-badge">${anime.episode}</span>
@@ -459,6 +450,7 @@
         }
 
         function deleteAnime(title) {
+            if (!isAdmin) return;
             if (confirm(`Kya aap "${title}" ko delete karna chahte hain?`)) {
                 savedAnime = savedAnime.filter(a => a.title !== title);
                 localStorage.setItem('animeList_hindi', JSON.stringify(savedAnime));
@@ -493,9 +485,31 @@
             renderAnime(filtered);
         });
 
-        adminBtn.addEventListener('click', () => {
-            adminModal.style.display = 'flex';
-        });
+        // SECRET TRICK: Logo ("AnimeHindiGhar") par 5 baar fast click karne se Admin Panel khulega
+        let titleClickCount = 0;
+        if (siteLogo) {
+            siteLogo.addEventListener('click', () => {
+                titleClickCount++;
+                if (titleClickCount >= 5) {
+                    titleClickCount = 0;
+                    if (!isAdmin) {
+                        let pass = prompt("Admin Password daaliye:");
+                        if (pass === "admin123") { // Yahan password badal sakte hain
+                            localStorage.setItem("is_admin", "true");
+                            isAdmin = true;
+                            alert("Admin Login Successful!");
+                            renderAnime(savedAnime);
+                            adminModal.style.display = 'flex';
+                        } else if (pass !== null) {
+                            alert("Galat Password!");
+                        }
+                    } else {
+                        adminModal.style.display = 'flex';
+                    }
+                }
+            });
+        }
+
         closeModal.addEventListener('click', () => {
             adminModal.style.display = 'none';
         });
@@ -508,6 +522,8 @@
 
         animeForm.addEventListener('submit', (e) => {
             e.preventDefault();
+            if (!isAdmin) return;
+
             const title = document.getElementById('animeTitleInput').value.trim();
             const episode = document.getElementById('animeEpisodeInput').value.trim();
             const category = document.getElementById('animeCategoryInput').value.trim();
@@ -571,4 +587,3 @@
     </script>
 </body>
 </html>
-      
