@@ -32,19 +32,16 @@
             <h2 class="hero-title" id="heroTitle">WELCOME TO ANIME HINDI GHAR</h2>
             <p class="hero-tags" id="heroTags">Dub | Sub • Action, Adventure, Shonen</p>
             <p class="hero-desc" id="heroDesc">
-                Yahan aapko sabhi latest anime Hindi dub aur sub mein milenge. Neeche scroll karein aur 50+ anime ki list explore karein!
+                Yahan aapko sabhi latest anime Hindi dub aur sub mein milenge. Neeche scroll karein aur anime ki list explore karein!
             </p>
-            <div class="hero-buttons">
-                <button class="btn-primary" id="heroPlayBtn"><i class="fa-solid fa-play"></i> Watch Now</button>
-            </div>
         </div>
     </section>
 
-    <!-- Anime List Section (50+ Scrollable) -->
+    <!-- Anime List Section -->
     <main class="main-container">
-        <h3 class="section-title">All Anime List (Scroll Down)</h3>
+        <h3 class="section-title">All Anime List</h3>
         <div class="anime-grid" id="animeGrid">
-            <!-- Dynamic Anime Cards JavaScript se yahan aayengi -->
+            <!-- Dynamic Anime Cards -->
         </div>
     </main>
 
@@ -55,10 +52,13 @@
             <h2>Admin Panel - Add Anime</h2>
             <form id="animeForm">
                 <label>Anime Title:</label>
-                <input type="text" id="animeTitleInput" required placeholder="Anime ka naam">
+                <input type="text" id="animeTitleInput" required placeholder="Jaise: Naruto Shippuden">
+                
+                <label>Episode Details (Jaise: Episode 1 / Ep 5):</label>
+                <input type="text" id="animeEpisodeInput" required placeholder="Episode 1">
                 
                 <label>Category / Genres (Dub | Sub):</label>
-                <input type="text" id="animeCategoryInput" required placeholder="Action, Dub | Sub">
+                <input type="text" id="animeCategoryInput" required placeholder="Action, Hindi Dub">
                 
                 <label>Gallery se Photo Select Karein (Permanent):</label>
                 <input type="file" id="animeImageInput" accept="image/*" required>
@@ -75,8 +75,9 @@
     <div id="videoModal" class="modal">
         <div class="video-modal-content">
             <span class="close-btn" id="closeVideoModal">&times;</span>
-            <h2 id="modalAnimeTitle" style="margin-bottom: 10px;"></h2>
-            <video id="animeVideoPlayer" controls style="width:150%; max-height:400px; background:#000;"></video>
+            <h2 id="modalAnimeTitle" style="margin-bottom: 5px; font-size: 18px;"></h2>
+            <p id="modalEpisodeInfo" style="color: #f47521; font-size: 13px; margin-bottom: 10px;"></p>
+            <video id="animeVideoPlayer" controls style="width:100%; max-height:400px; background:#000;"></video>
         </div>
     </div>
 
