@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anime Hindi Ghar - Watch Anime in Hindi</title>
+    <title>AnimeFlix India - Watch Anime in Hindi</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -284,10 +284,10 @@
 </head>
 <body>
 
-    <!-- Top Navigation Bar (Admin button removed) -->
+    <!-- Top Navigation Bar -->
     <header class="navbar">
         <div class="nav-left">
-            <h1 class="logo" id="siteLogo">Anime<span>HindiGhar</span></h1>
+            <h1 class="logo" id="siteLogo">Anime<span>Flix</span> India</h1>
         </div>
     </header>
 
@@ -301,7 +301,7 @@
     <section class="hero" id="heroSection">
         <div class="hero-content">
             <span class="badge">HINDI DUBBED</span>
-            <h2 class="hero-title" id="heroTitle">WELCOME TO ANIME HINDI GHAR</h2>
+            <h2 class="hero-title" id="heroTitle">WELCOME TO ANIMEFLIX INDIA</h2>
             <p class="hero-tags" id="heroTags">Dub | Sub • Action, Adventure, Shonen</p>
             <p class="hero-desc" id="heroDesc">
                 Yahan aapko sabhi latest anime Hindi dub aur sub mein milenge. Neeche scroll karein aur anime ki list explore karein!
@@ -353,7 +353,7 @@
         </div>
     </div>
 
-    <!-- Bottom Mobile Navigation Bar (Admin Add removed) -->
+    <!-- Bottom Mobile Navigation Bar -->
     <nav class="bottom-nav">
         <a href="#" class="nav-item active">
             <i class="fa-solid fa-house"></i>
@@ -367,7 +367,6 @@
 
     <!-- JavaScript Local Storage & JSON Download Integration -->
     <script>
-        // Check Admin Status
         let isAdmin = localStorage.getItem("is_admin") === "true";
         let savedAnime = [];
 
@@ -418,7 +417,6 @@
                 const card = document.createElement('div');
                 card.className = 'anime-card';
                 
-                // Delete button sirf tabhi dikhega jab user Admin hoga
                 let deleteButtonHTML = isAdmin ? `
                     <button class="card-delete-btn" onclick="event.stopPropagation(); deleteAnime('${anime.title}')" title="Delete Anime" style="position: absolute; top: 5px; right: 5px; background: rgba(255,0,0,0.8); color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; z-index: 10; font-size: 12px;">
                         <i class="fa-solid fa-trash"></i>
@@ -485,7 +483,7 @@
             renderAnime(filtered);
         });
 
-        // SECRET TRICK: Logo ("AnimeHindiGhar") par 5 baar fast click karne se Admin Panel khulega
+        // Secret 5-Tap Trick on Logo
         let titleClickCount = 0;
         if (siteLogo) {
             siteLogo.addEventListener('click', () => {
@@ -494,7 +492,7 @@
                     titleClickCount = 0;
                     if (!isAdmin) {
                         let pass = prompt("Admin Password daaliye:");
-                        if (pass === "admin123") { // Yahan password badal sakte hain
+                        if (pass === "admin123") {
                             localStorage.setItem("is_admin", "true");
                             isAdmin = true;
                             alert("Admin Login Successful!");
